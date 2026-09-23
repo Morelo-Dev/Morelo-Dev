@@ -1,0 +1,26 @@
+name: Sync wiki
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/wiki/**'
+      - 'scripts/sync-wiki.ps1'
+      - '.github/workflows/sync-wiki.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sync ficha → morelo-wiki
+        env:
+          WIKI_SYNC_TOKEN: ${{ secrets.WIKI_SYNC_TOKEN }}
+          GITHUB_SHA: ${{ github.sha }}
+          SYNC_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: pwsh -NoProfile -File scripts/sync-wiki.ps1
