@@ -66,8 +66,22 @@ try {
 
   git commit -m $msg
   if ($LASTEXITCODE -ne 0) { Write-Error "git commit failed" }
-  git push origin main
-  if ($LASTEXITCODE -ne 0) { Write-Error "git push failed" }
+
+  $pushed = $false
+  for ($intento = 1; $intento -le 6; $intento++) {
+    git push origin main
+    if ($LASTEXITCODE -eq 0) { $pushed = $true; break }
+    Write-Host "main de la wiki avanzó; reintento $intento"
+    git fetch --depth=50 origin main
+    if ($LASTEXITCODE -ne 0) { Start-Sleep -Seconds $intento; continue }
+    git rebase origin/main
+    if ($LASTEXITCODE -ne 0) {
+      git rebase --abort
+      Start-Sleep -Seconds $intento
+      continue
+    }
+  }
+  if (-not $pushed) { Write-Error "git push failed" }
   Write-Host "Wiki actualizada: $msg"
 }
 finally {
