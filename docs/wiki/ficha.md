@@ -6,8 +6,10 @@ Tarjeta pública de GitHub. Quien abre [github.com/Morelo-Dev](https://github.co
 |---|---|
 | **Estado** | Activo |
 | **Repo** | [Morelo-Dev/Morelo-Dev](https://github.com/Morelo-Dev/Morelo-Dev) · rama `main` |
+| **Stack** | Markdown (README de perfil de GitHub) · GitHub Actions |
 | **Qué muestra** | JMFENIX, Master Services, CrasterDoc, morelodev.com, MoneyTracker, NovaSuite y JAMH Music |
-| **Fuente de esta página** | `docs/wiki/` de este repo. Un push a `main` la publica en la wiki |
+| **Fuente de esta página** | `docs/wiki/` de este repo. Un push a `main` o `master` la publica en la wiki |
+| **Última revisión** | 2026-09-23 |
 
 > **Cambios recientes:** [qué es nuevo](/proyectos/morelo-dev-cambios)
 
