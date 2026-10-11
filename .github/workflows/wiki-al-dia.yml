@@ -1,0 +1,32 @@
+name: Wiki al día
+
+# Regla: la ficha de Morelo Wiki acompaña a cada cambio del producto.
+# - Siempre revisa el formato de docs/wiki/ (lo que la wiki necesita leer).
+# - En un PR a main/master que cambia código sin tocar docs/wiki/cambios.md,
+#   falla. Si de verdad no aplica: etiqueta «sin-wiki» o «[sin wiki]» en el commit.
+# - En un push directo a main/master solo avisa.
+on:
+  pull_request:
+    branches: [main, master]
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+  push:
+    branches: [main, master]
+
+permissions:
+  contents: read
+
+jobs:
+  revisar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Revisar docs/wiki
+        env:
+          EVENTO: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          CABEZA: ${{ github.event.pull_request.head.sha || github.sha }}
+          ETIQUETAS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+        run: pwsh -NoProfile -File scripts/verificar-wiki.ps1 -Base "$BASE" -Cabeza "$CABEZA" -Evento "$EVENTO" -Etiquetas "$ETIQUETAS"
