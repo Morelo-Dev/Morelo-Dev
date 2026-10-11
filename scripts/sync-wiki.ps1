@@ -1,5 +1,6 @@
-# Sync wiki → morelo-wiki
-# Copia docs/wiki/* al hub y deja un rastro de commit.
+﻿# Sync wiki → morelo-wiki
+# Copia docs/wiki/ (ficha, cambios y media/) al hub y deja un rastro de commit.
+# Plantilla: morelo-wiki/plantillas-producto/scripts/sync-wiki.ps1
 
 param(
   [string]$WikiRepo = "Morelo-Dev/morelo-wiki",
@@ -9,6 +10,47 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+function Sync-WikiRebase {
+  param([string]$Slug)
+
+  # En un rebase, --theirs es el commit de este producto y --ours es main ya actualizado.
+  $propios = @(
+    "docs/proyectos/$Slug.md",
+    "docs/proyectos/$Slug-cambios.md"
+  )
+
+  git rebase origin/main
+  if ($LASTEXITCODE -eq 0) { return $true }
+
+  for ($paso = 1; $paso -le 30; $paso++) {
+    $conflictos = @(git diff --name-only --diff-filter=U)
+    if ($conflictos.Count -eq 0) { return $false }
+
+    foreach ($ruta in $conflictos) {
+      $norm = ($ruta -replace '\\', '/').Trim()
+      if ($propios -contains $norm -or $norm -like "docs/proyectos/media/$Slug/*") {
+        git checkout --theirs -- $ruta
+      } else {
+        git checkout --ours -- $ruta
+      }
+      if ($LASTEXITCODE -ne 0) { return $false }
+      git add -- $ruta
+      if ($LASTEXITCODE -ne 0) { return $false }
+    }
+
+    git -c core.editor=true rebase --continue
+    if ($LASTEXITCODE -eq 0) { return $true }
+
+    $estado = git status 2>&1 | Out-String
+    if ($estado -match 'No changes|nothing to commit|no changes') {
+      git rebase --skip
+      if ($LASTEXITCODE -eq 0) { return $true }
+    }
+  }
+
+  return $false
+}
+
 $token = $env:WIKI_SYNC_TOKEN
 if (-not $token) { $token = $env:GITHUB_TOKEN }
 if (-not $token) { $token = $env:GH_TOKEN }
@@ -17,9 +59,10 @@ if (-not $token) {
 }
 
 $root = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
-$wikiSrc = Join-Path $root "docs\wiki"
+$wikiSrc = Join-Path $root "docs/wiki"
 $fichaSrc = Join-Path $wikiSrc "ficha.md"
 $cambiosSrc = Join-Path $wikiSrc "cambios.md"
+$mediaSrc = Join-Path $wikiSrc "media"
 
 if (-not (Test-Path $fichaSrc)) { Write-Error "No existe $fichaSrc" }
 
@@ -31,20 +74,33 @@ $cloneUrl = "https://x-access-token:${token}@github.com/${WikiRepo}.git"
 git clone --depth 1 --branch main $cloneUrl $tmp
 if ($LASTEXITCODE -ne 0) { Write-Error "git clone failed" }
 
-$destFicha = Join-Path $tmp "docs\proyectos\$ProjectSlug.md"
-$destCambios = Join-Path $tmp "docs\proyectos\$ProjectSlug-cambios.md"
+$destFicha = Join-Path $tmp "docs/proyectos/$ProjectSlug.md"
+$destCambios = Join-Path $tmp "docs/proyectos/$ProjectSlug-cambios.md"
+$destMedia = Join-Path $tmp "docs/proyectos/media/$ProjectSlug"
 
 Copy-Item $fichaSrc $destFicha -Force
 if (Test-Path $cambiosSrc) {
   Copy-Item $cambiosSrc $destCambios -Force
 }
 
+# Medios: espejo de docs/wiki/media/ (lo que se borra aquí se borra en la wiki)
+if (Test-Path $destMedia) { Remove-Item $destMedia -Recurse -Force }
+if (Test-Path $mediaSrc) {
+  Get-ChildItem $mediaSrc -Recurse -File |
+    Where-Object { $_.Extension -notin '.md', '.mdx' } |
+    ForEach-Object {
+      $relativo = [System.IO.Path]::GetRelativePath($mediaSrc, $_.FullName)
+      $destino = Join-Path $destMedia $relativo
+      New-Item -ItemType Directory -Force -Path (Split-Path $destino) | Out-Null
+      Copy-Item $_.FullName $destino -Force
+    }
+}
+
 Push-Location $tmp
 try {
   git config user.name "morelo-wiki-sync[bot]"
   git config user.email "112214536+Morelo-Dev@users.noreply.github.com"
-  git add "docs/proyectos/$ProjectSlug.md"
-  if (Test-Path $destCambios) { git add "docs/proyectos/$ProjectSlug-cambios.md" }
+  git add -A -- "docs/proyectos"
 
   $status = git status --porcelain
   if (-not $status) {
@@ -72,14 +128,18 @@ try {
     git push origin main
     if ($LASTEXITCODE -eq 0) { $pushed = $true; break }
     Write-Host "main de la wiki avanzó; reintento $intento"
-    git fetch --depth=50 origin main
+    git fetch --depth=200 origin main
     if ($LASTEXITCODE -ne 0) { Start-Sleep -Seconds $intento; continue }
-    git rebase origin/main
-    if ($LASTEXITCODE -ne 0) {
-      git rebase --abort
+    if (-not (Sync-WikiRebase -Slug $ProjectSlug)) {
+      $rebaseEnCurso = git rev-parse --git-path rebase-merge 2>$null
+      if ($rebaseEnCurso -and (Test-Path $rebaseEnCurso)) { git rebase --abort }
       Start-Sleep -Seconds $intento
       continue
     }
+  }
+  if (-not $pushed) {
+    git push origin main
+    if ($LASTEXITCODE -eq 0) { $pushed = $true }
   }
   if (-not $pushed) { Write-Error "git push failed" }
   Write-Host "Wiki actualizada: $msg"

@@ -1,8 +1,10 @@
 name: Sync wiki
 
+# Regla: todo lo que llega a la rama principal (main o master) con cambios
+# en docs/wiki/ se publica en Morelo Wiki.
 on:
   push:
-    branches: [main]
+    branches: [main, master]
     paths:
       - 'docs/wiki/**'
       - 'scripts/sync-wiki.ps1'
@@ -11,6 +13,10 @@ on:
 
 permissions:
   contents: read
+
+concurrency:
+  group: sync-wiki
+  cancel-in-progress: false
 
 jobs:
   sync:
