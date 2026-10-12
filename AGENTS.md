@@ -15,3 +15,4 @@ Cómo escribirla: skill `documentar-wiki` en `.cursor/skills/documentar-wiki/SKI
 - Al llegar a `main` o `master`, el Action **Sync wiki** publica solo. No edites `morelo-wiki` ni Cloudflare a mano.
 - El check **Wiki al día** falla en un PR que cambia código sin entrada en `cambios.md`. Si de verdad no aplica, etiqueta el PR `sin-wiki` o pon `[sin wiki]` en el commit.
 - Commits con autor y committer `Morelo-Dev <112214536+Morelo-Dev@users.noreply.github.com>`, sin `Co-authored-by` ni trailers de agentes o IA.
+- Una rama ya fusionada en `main` o `master` se borra en GitHub y en local (`git push origin --delete <rama>` y `git branch -d <rama>`), después de comprobar que no le quedan commits fuera de la rama principal.

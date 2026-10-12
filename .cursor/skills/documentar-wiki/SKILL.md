@@ -12,11 +12,11 @@ description: >-
 
 Morelo Wiki publica lo que hay en `docs/wiki/` de este repo:
 
-| Archivo | Qué es |
-| --- | --- |
-| `docs/wiki/ficha.md` | El producto **hoy**: qué hace, cómo se arranca, cómo se despliega |
-| `docs/wiki/cambios.md` | Historial: qué había antes, qué hay ahora y por qué importa |
-| `docs/wiki/media/` | Capturas y clips cortos que usan los dos archivos |
+| Archivo                | Qué es                                                            |
+| ---------------------- | ----------------------------------------------------------------- |
+| `docs/wiki/ficha.md`   | El producto **hoy**: qué hace, cómo se arranca, cómo se despliega |
+| `docs/wiki/cambios.md` | Historial: qué había antes, qué hay ahora y por qué importa       |
+| `docs/wiki/media/`     | Capturas y clips cortos que usan los dos archivos                 |
 
 Un push a `main` o `master` que toque `docs/wiki/**` lo publica solo (Action **Sync wiki**). No edites `morelo-wiki` ni Cloudflare a mano.
 
@@ -24,15 +24,15 @@ Un push a `main` o `master` que toque `docs/wiki/**` lo publica solo (Action **S
 
 ## Cuándo es obligatorio
 
-| Cambio | `ficha.md` | `cambios.md` |
-| --- | --- | --- |
-| Comportamiento visible, flujo, pantalla o endpoint | Sección afectada | Entrada nueva |
-| Modelo de datos o migración | Arquitectura | Entrada nueva |
-| Comandos, scripts o variables de entorno | Arranque / Variables | Entrada nueva |
-| Deploy, hosting, dominio o rama principal | Tabla + Deploy | Entrada nueva |
-| Stack o dependencia principal | Fila **Stack** | Entrada nueva |
-| Decisión difícil de revertir | Decisiones | Entrada nueva |
-| Refactor sin efecto, estilos, tests, typos | No | No (`[sin wiki]` en el commit o etiqueta `sin-wiki` en el PR) |
+| Cambio                                             | `ficha.md`           | `cambios.md`                                                  |
+| -------------------------------------------------- | -------------------- | ------------------------------------------------------------- |
+| Comportamiento visible, flujo, pantalla o endpoint | Sección afectada     | Entrada nueva                                                 |
+| Modelo de datos o migración                        | Arquitectura         | Entrada nueva                                                 |
+| Comandos, scripts o variables de entorno           | Arranque / Variables | Entrada nueva                                                 |
+| Deploy, hosting, dominio o rama principal          | Tabla + Deploy       | Entrada nueva                                                 |
+| Stack o dependencia principal                      | Fila **Stack**       | Entrada nueva                                                 |
+| Decisión difícil de revertir                       | Decisiones           | Entrada nueva                                                 |
+| Refactor sin efecto, estilos, tests, typos         | No                   | No (`[sin wiki]` en el commit o etiqueta `sin-wiki` en el PR) |
 
 La documentación va **en el mismo commit o PR** que el código. Un cambio sin su entrada no está terminado.
 
@@ -51,24 +51,32 @@ En este orden. Quita las secciones que no apliquen; no dejes «…» ni «pendie
 
 Una o dos frases: qué es, para quién y qué problema resuelve.
 
-| | |
-|---|---|
-| **Estado** | Activo · Piloto · En pausa · Archivado |
-| **Repo** | [Morelo-Dev/repo](https://github.com/Morelo-Dev/repo) · rama `main` |
-| **Stack** | Tecnologías principales separadas por « · » |
-| **Deploy** | Dónde corre y su URL |
-| **Última revisión** | YYYY-MM-DD |
+|                     |                                                                     |
+| ------------------- | ------------------------------------------------------------------- |
+| **Estado**          | Activo · Piloto · En pausa · Archivado                              |
+| **Repo**            | [Morelo-Dev/repo](https://github.com/Morelo-Dev/repo) · rama `main` |
+| **Stack**           | Tecnologías principales separadas por « · »                         |
+| **Deploy**          | Dónde corre y su URL                                                |
+| **Última revisión** | YYYY-MM-DD                                                          |
 
 > **Cambios recientes:** [qué es nuevo respecto al estado anterior](cambios.md)
 
 ## Demo
+
 ## Qué hace
+
 ## Arquitectura
+
 ## Arranque local
+
 ## Variables de entorno
+
 ## Deploy
+
 ## Decisiones
+
 ## Fallos comunes
+
 ## Dónde se documenta
 ```
 
@@ -90,6 +98,7 @@ Una o dos frases: qué es, para quién y qué problema resuelve.
 **Antes:** cómo era.
 
 **Ahora:**
+
 - qué cambió (una viñeta por cambio visible)
 
 **Por qué importa:** para quién y qué resuelve.
@@ -133,3 +142,4 @@ Una o dos frases: qué es, para quién y qué problema resuelve.
 - Autor y committer: `Morelo-Dev <112214536+Morelo-Dev@users.noreply.github.com>` (`--author` y `GIT_COMMITTER_NAME` / `GIT_COMMITTER_EMAIL`). No cambies `git config`.
 - Nunca `Co-authored-by`, `--trailer` ni firmas de agentes o IA en commits y PR.
 - Push solo si lo pidieron. Al llegar a `main` o `master`, **Sync wiki** publica la ficha; en cada PR, **Wiki al día** revisa que esté al día.
+- Una rama ya fusionada en `main` o `master` se borra en GitHub y en local (`git push origin --delete <rama>` y `git branch -d <rama>`), después de comprobar que no le quedan commits fuera de la rama principal.
